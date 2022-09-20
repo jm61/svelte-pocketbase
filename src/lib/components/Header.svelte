@@ -1,16 +1,16 @@
 <script>
   import PocketBase from "pocketbase"
-  import { status, username, user, pageResult } from "../store"
+  import { status, username, user, admin, pageResult } from "../store"
   const client = new PocketBase("http://127.0.0.1:8090")
   let state = { email: "", password: "" }
   let pbError
-  console.clear()
 
   $: disabled = !state.email || !state.password
 
   async function handleSignup() {
     try {
-      const user = await client.users.create({
+      await client.admins.authViaEmail("jean.moirano@gmail.com", "1234512345")
+      const user = await client.admins.create({
         email: state.email,
         password: state.password,
         passwordConfirm: state.password
@@ -31,10 +31,12 @@
   }
 
   async function deleteUser() {
-    await client.users.delete("fgsl6fkgduo8jry")
+    await client.admins.authViaEmail("jean.moirano@gmail.com", "1234512345")
+    await client.admins.delete("w8e6wol7z6gvn0c")
   }
+  //deleteUser()
 
-  async function handleLogin() {
+  async function userLogin() {
     try {
       const authData = await client.users.authViaEmail(
         state.email,
@@ -42,6 +44,26 @@
       )
       if (authData) {
         $username = authData?.user.email.split("@")[0].toUpperCase()
+        $user = authData
+        state.email = ""
+        state.password = ""
+        $status = true
+        pbError = null
+      }
+    } catch (error) {
+      pbError = error.data
+      state.email = ""
+      state.password = ""
+    }
+  }
+  async function adminLogin() {
+    try {
+      const authData = await client.admins.authViaEmail(
+        state.email,
+        state.password
+      )
+      if (authData) {
+        $username = authData?.admin.email.split("@")[0].toUpperCase()
         $user = authData
         state.email = ""
         state.password = ""
@@ -73,7 +95,8 @@
     <input type="email" bind:value={state.email} required />
     <label for="password">Password</label>
     <input type="password" bind:value={state.password} required />
-    <button on:click={handleLogin} {disabled}>Login</button>
+    <button on:click={userLogin} {disabled}>User Login</button>
+    <button on:click={adminLogin} {disabled}>Admin Login</button>
     <button on:click={handleSignup} {disabled}>Signup</button>
   {/if}
   {#if $status}

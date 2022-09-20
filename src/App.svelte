@@ -9,17 +9,26 @@
     $pageResult = await client.records.getFullList("movies", 100)
     //console.log(pageResult)
   }
+
+  async function usersList() {
+    const result = await client.users.getFullList(50, { sort: "-created" })
+    console.log(result)
+  }
+
+  async function resetList() {
+    $pageResult = []
+  }
 </script>
 
 <Header />
 
 <h2>Welcome to PocketBase {$username}!</h2>
 {#if $status === true}
-  <img
+  <!-- <img
     class:noImg={!$status}
     src={`http://127.0.0.1:8090/api/files/systemprofiles0/${$user.user.profile.id}/${$user.user.profile.avatar}?thumb=100x100`}
     alt="avatar"
-  />
+  /> -->
 {/if}
 <div>
   {#if $status === true}
@@ -31,7 +40,9 @@
 </div>
 <hr style="color: goldenrod;" />
 {#if $status === true}
-  <button class="btn" on:click={moviesList}>Movies List</button> <br />
+  <button class="btn" on:click={moviesList}>Movies List</button>
+  <button class="btn" on:click={usersList}>Users List</button>
+  <button class="btn" on:click={resetList}>Reset List</button> <br />
 
   <!-- <pre>{JSON.stringify(pageResult, null, 2)}</pre> -->
   {#each $pageResult as items, id (id)}
