@@ -1,16 +1,16 @@
 <script>
   import PocketBase from "pocketbase"
-  import { status, username, user, admin, pageResult } from "../store"
+  import { status, username, user, admin, pageResult, verified } from "../store"
   const client = new PocketBase("http://127.0.0.1:8090")
   let state = { email: "", password: "" }
   let pbError
 
   $: disabled = !state.email || !state.password
 
-  async function handleSignup() {
+  async function userSignup() {
     try {
-      await client.admins.authViaEmail("jean.moirano@gmail.com", "1234512345")
-      const user = await client.admins.create({
+      //await client.admins.authViaEmail("jean.moirano@gmail.com", "1234512345")
+      const user = await client.users.create({
         email: state.email,
         password: state.password,
         passwordConfirm: state.password
@@ -18,6 +18,8 @@
 
       if (user) {
         sendemail()
+        state.email = ""
+        state.password = ""
       }
     } catch (error) {
       pbError = error.data
@@ -49,6 +51,7 @@
         state.password = ""
         $status = true
         pbError = null
+        $verified = true
       }
     } catch (error) {
       pbError = error.data
@@ -64,11 +67,12 @@
       )
       if (authData) {
         $username = authData?.admin.email.split("@")[0].toUpperCase()
-        $user = authData
+        $admin = authData
         state.email = ""
         state.password = ""
         $status = true
         pbError = null
+        $verified = undefined
       }
     } catch (error) {
       pbError = error.data
@@ -97,7 +101,7 @@
     <input type="password" bind:value={state.password} required />
     <button on:click={userLogin} {disabled}>User Login</button>
     <button on:click={adminLogin} {disabled}>Admin Login</button>
-    <button on:click={handleSignup} {disabled}>Signup</button>
+    <button on:click={userSignup} {disabled}>User Signup</button>
   {/if}
   {#if $status}
     <button on:click={handleLogout}><small>Logout</small></button>
