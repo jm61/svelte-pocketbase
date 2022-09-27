@@ -1,4 +1,5 @@
 <script>
+  //import PocketBase from "pocketbase"
   import PocketBase from "pocketbase"
   import { status, username, user, admin, pageResult, verified } from "../store"
   const client = new PocketBase("http://127.0.0.1:8090")

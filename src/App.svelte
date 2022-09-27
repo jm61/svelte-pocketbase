@@ -1,14 +1,7 @@
 <script>
   import Header from "./lib/components/Header.svelte"
-  import PocketBase from "pocketbase"
-  import {
-    status,
-    username,
-    user,
-    admin,
-    pageResult,
-    verified
-  } from "../src/lib/store"
+  import PocketBase, { User, Admin } from "pocketbase"
+  import { status, user, admin, pageResult, verified } from "../src/lib/store"
   const client = new PocketBase("http://127.0.0.1:8090")
   $: users = []
 
@@ -17,8 +10,9 @@
   }
 
   async function usersList() {
-    users = await client.users.getFullList(50, { sort: "-created" })
-    console.log(users)
+    if (client.authStore.model instanceof Admin) {
+      users = await client.users.getFullList(50, { sort: "-created" })
+    } else console.log("Not an admin")
   }
 
   async function resetList() {
@@ -29,7 +23,7 @@
 
 <Header />
 
-<h2>Welcome to PocketBase {$username}!</h2>
+<h2>Welcome to PocketBase {$user.user?.profile.name}!</h2>
 {#if $status}
   {#if $verified}
     <img
